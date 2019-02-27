@@ -232,7 +232,6 @@ let mk_fresh_var taken init =
   done;
   !tmp
 
-
 (* tm[tvar := tp] *)
 let rec subst_type_in_type tvar tp tm = match tm with
   | PrimType _ | Unit -> tm
