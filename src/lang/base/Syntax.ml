@@ -277,26 +277,24 @@ let rec refresh_tfun t taken = match t with
 
   (* Alpha renaming to canonical (pre-determined) names. *)
   let canonicalize_tfun t =
-    let taken = free_tvars t in
     (* The parser doesn't allow type names to begin with '_'. *)
     let get_new_name counter = "'_A" ^ Int.to_string counter in
-    let rec refresh t taken counter = match t with
-      | MapType (kt, vt) -> MapType (kt, refresh vt taken counter)
+    let rec refresh t counter = match t with
+      | MapType (kt, vt) -> MapType (kt, refresh vt counter)
       | FunType (at, rt) ->
-          FunType (refresh at taken counter, refresh rt taken counter)
+          FunType (refresh at counter, refresh rt counter)
       | ADT (n, ts) ->
-          let ts' = List.map ts ~f:(fun w -> refresh w taken counter) in
+          let ts' = List.map ts ~f:(fun w -> refresh w counter) in
           ADT (n, ts')
       | PrimType _ | TypeVar _ | Unit -> t
       | PolyFun (arg, bt) ->
           let arg' = get_new_name counter in
           let tv_new = TypeVar arg' in
           let bt1 = subst_type_in_type arg tv_new bt in
-          let taken' = arg' :: taken in
-          let bt2 = refresh bt1 taken' (counter+1) in
+          let bt2 = refresh bt1 (counter+1) in
           PolyFun (arg', bt2)
     in
-    refresh t taken 1
+    refresh t 1
 
   (* The same as above, but for a variable with locations *)
   let subst_type_in_type' tv = subst_type_in_type (get_id tv)
